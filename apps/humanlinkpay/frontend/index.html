@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HumanlinkPay Demo</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #0b1020;
+        --card: #121933;
+        --card-2: #182247;
+        --card-3: #0d1530;
+        --text: #eef3ff;
+        --muted: #9fb0d9;
+        --accent: #67a1ff;
+        --accent-2: #8c6cff;
+        --success: #3dd598;
+        --warn: #ffce52;
+        --danger: #ff6b7a;
+        --border: rgba(255, 255, 255, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top right, rgba(103, 161, 255, 0.18), transparent 28%),
+          radial-gradient(circle at top left, rgba(140, 108, 255, 0.12), transparent 24%),
+          var(--bg);
+        color: var(--text);
+      }
+
+      .layout {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 32px 20px 56px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: 34px;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .badge-row,
+      .legend-row,
+      .preset-row,
+      .button-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .badge,
+      .legend {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 20px;
+      }
+
+      .card {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
+      }
+
+      .card h2 {
+        margin-top: 0;
+        margin-bottom: 12px;
+        font-size: 20px;
+      }
+
+      .subtext,
+      .hint,
+      .preset-help {
+        margin: 0 0 16px;
+        color: var(--muted);
+        line-height: 1.6;
+        font-size: 14px;
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 20px;
+      }
+
+      .form-grid,
+      .field,
+      .result-panel,
+      .builder-panel {
+        display: grid;
+        gap: 10px;
+      }
+
+      .field label {
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      input,
+      textarea,
+      button {
+        font: inherit;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+      }
+
+      textarea {
+        min-height: 92px;
+        resize: vertical;
+      }
+
+      button {
+        padding: 12px 16px;
+        border: 0;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+
+      .primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: white;
+        font-weight: 700;
+      }
+
+      .secondary,
+      .preset,
+      .ghost {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+
+      .preset.active {
+        background: linear-gradient(135deg, rgba(103, 161, 255, 0.2), rgba(140, 108, 255, 0.22));
+      }
+
+      .checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .checkbox input {
+        width: auto;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--border);
+      }
+
+      .status-ok { color: var(--success); }
+      .status-warn { color: var(--warn); }
+      .status-danger { color: var(--danger); }
+
+      .timeline {
+        display: grid;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .step,
+      .chat-message,
+      .builder-line {
+        display: grid;
+        gap: 8px;
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .step {
+        grid-template-columns: 32px 1fr;
+        align-items: start;
+      }
+
+      .dot {
+        width: 14px;
+        height: 14px;
+        margin-top: 4px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.08);
+      }
+
+      .step.active .dot { background: var(--warn); }
+      .step.done .dot { background: var(--success); }
+      .step.error .dot { background: var(--danger); }
+
+      .step-title,
+      .chat-role,
+      .metric-label strong {
+        font-weight: 700;
+      }
+
+      .step-desc,
+      .chat-body,
+      .builder-desc,
+      .preset-help {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .chat-shell {
+        display: grid;
+        gap: 12px;
+      }
+
+      .chat-log {
+        min-height: 640px;
+        max-height: 640px;
+        overflow: auto;
+        padding-right: 8px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .chat-message.user {
+        background: rgba(103, 161, 255, 0.14);
+      }
+
+      .chat-message.hermes {
+        background: rgba(140, 108, 255, 0.14);
+      }
+
+      .chat-role {
+        font-size: 13px;
+      }
+
+      .chat-composer {
+        display: grid;
+        gap: 12px;
+      }
+
+      .builder-line code,
+      .metric-value code {
+        word-break: break-all;
+      }
+
+      .result-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric {
+        padding: 14px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+      }
+
+      .metric-label {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 6px;
+      }
+
+      .metric-value {
+        word-break: break-word;
+        line-height: 1.6;
+      }
+
+      a {
+        color: #9ac2ff;
+      }
+
+      pre {
+        margin: 0;
+        padding: 14px;
+        border-radius: 14px;
+        background: #0a1228;
+        border: 1px solid var(--border);
+        overflow: auto;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(3, 6, 16, 0.72);
+        backdrop-filter: blur(8px);
+        z-index: 20;
+      }
+
+      .overlay.show {
+        display: flex;
+      }
+
+      .modal {
+        width: min(520px, calc(100vw - 32px));
+        padding: 24px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(18, 25, 51, 0.98), rgba(12, 18, 36, 0.98));
+        border: 1px solid var(--border);
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.36);
+      }
+
+      .modal h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 22px;
+      }
+
+      .modal p {
+        margin: 0 0 12px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .spinner {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        border: 4px solid rgba(255, 255, 255, 0.15);
+        border-top-color: var(--warn);
+        animation: spin 1s linear infinite;
+        margin-bottom: 14px;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      @media (max-width: 1180px) {
+        .grid,
+        .two-col,
+        .result-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .chat-log {
+          min-height: 420px;
+          max-height: 420px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <section class="hero">
+        <h1>HumanlinkPay Demo</h1>
+        <p>
+          可视化演示 `Hermes -> HumanlinkPay Gateway -> HumanLink SDK -> Sepolia Native Transfer`
+          的完整链路。当前风险阈值固定为 <strong>0.001 Sepolia ETH</strong>。
+        </p>
+        <div class="badge-row">
+          <div class="badge">低风险: `amount &lt;= 0.001 ETH` 自动放行</div>
+          <div class="badge">高风险: `amount &gt; 0.001 ETH` 触发 HumanLink</div>
+          <div class="badge">成功授权后自动打开 `humanlink_record_url`</div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>Hermes 对话窗口</h2>
+          <p class="subtext">
+            这里模拟你和 Hermes 的自然聊天。聊天记录会保存在浏览器本地，刷新或重启 gateway 后仍然会保留。
+          </p>
+          <div class="chat-shell">
+            <div class="chat-log" id="chat-log"></div>
+            <div class="chat-composer">
+              <div class="field">
+                <label for="chat-input">和 Hermes 继续聊天</label>
+                <textarea id="chat-input">请调用 HumanlinkPay payment gateway，向 0x2E5F15E329b49D4B38fFdD100E0793780966eA6D 支付 0.0011 ETH，用途是 Buy API access。</textarea>
+              </div>
+              <div class="button-row">
+                <button class="primary" type="button" id="send-chat">发送给 Hermes</button>
+                <button class="secondary" type="button" id="check-health">检查 Gateway 健康状态</button>
+                <button class="ghost" type="button" id="clear-chat">清空聊天记录</button>
+              </div>
+              <p class="hint">
+                只要一句话里包含地址、金额和支付语义，Hermes 就会自动解析，并把交易请求填到右侧表单里。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>交易请求</h2>
+          <p class="subtext">
+            Hermes 解析出的地址、金额、用途会自动填到这里。字段齐全后会默认自动发给 gateway；你也可以手动修改后再重新发起。
+          </p>
+          <div class="preset-row">
+            <button class="preset" type="button" id="preset-deny">填充 DENY 示例</button>
+            <button class="preset" type="button" id="preset-allow">填充 ALLOW 示例</button>
+            <button class="preset" type="button" id="preset-require">填充 REQUIRE_HL 示例</button>
+          </div>
+          <div class="legend-row">
+            <div class="legend">`DENY`：地址不在 allowlist，策略直接拒绝</div>
+            <div class="legend">`ALLOW`：金额 `<= 0.001 ETH`，不触发 HumanLink</div>
+            <div class="legend">`REQUIRE_HL`：金额 `> 0.001 ETH`，触发 HumanLink 指纹授权</div>
+          </div>
+          <p class="preset-help" id="preset-help">
+            当前展示的是 `REQUIRE_HL` 示例：收款地址在 allowlist 且金额超过阈值，会触发 HumanLink SDK 指纹授权。
+          </p>
+
+          <form id="payment-form" class="form-grid">
+            <div class="field">
+              <label for="user-id">User ID</label>
+              <input id="user-id" name="userId" value="demo-user" />
+            </div>
+            <div class="field">
+              <label for="recipient">收款地址</label>
+              <input id="recipient" name="to" value="0x2E5F15E329b49D4B38fFdD100E0793780966eA6D" />
+            </div>
+            <div class="field">
+              <label for="amount">金额（ETH）</label>
+              <input id="amount" name="amount" value="0.0011" />
+            </div>
+            <div class="field">
+              <label for="purpose">用途</label>
+              <textarea id="purpose" name="purpose">Buy API access</textarea>
+            </div>
+            <div class="field">
+              <label for="token">Token</label>
+              <input id="token" name="token" value="ETH" />
+            </div>
+            <label class="checkbox">
+              <input id="auto-open" type="checkbox" checked />
+              成功返回 `humanlink_record_url` 时自动在浏览器新标签打开
+            </label>
+            <div class="button-row">
+              <button class="primary" type="submit">发起支付</button>
+            </div>
+          </form>
+          <p class="hint">推荐演示顺序：`DENY` -> `ALLOW` -> `REQUIRE_HL`。</p>
+        </div>
+      </section>
+
+      <section class="grid" style="margin-top: 20px;">
+        <div class="card">
+          <h2>流程可视化</h2>
+          <div id="status-pill" class="status-pill">等待发起</div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+
+        <div class="card">
+          <h2>结果与工具参数</h2>
+          <div class="result-panel">
+            <div id="result-grid" class="result-grid"></div>
+            <div class="builder-panel">
+              <div class="builder-line">
+                <div class="metric-label"><strong>Hermes 工具名</strong></div>
+                <div class="builder-desc"><code>humanlinkpay_transfer</code></div>
+              </div>
+              <div class="builder-line">
+                <div class="metric-label"><strong>结构化参数</strong></div>
+                <pre id="tool-args-json">{}</pre>
+              </div>
+              <div class="builder-line">
+                <div class="metric-label"><strong>请求 JSON</strong></div>
+                <pre id="request-json">{}</pre>
+              </div>
+              <div class="builder-line">
+                <div class="metric-label"><strong>响应 JSON</strong></div>
+                <pre id="response-json">{}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="overlay" id="humanlink-overlay">
+      <div class="modal">
+        <div class="spinner"></div>
+        <h3>请完成 HumanLink 授权</h3>
+        <p>当前交易金额超过 `0.001 Sepolia ETH` 阈值，Gateway 已触发 HumanLink SDK。</p>
+        <p>请在 HumanLink 设备上完成指纹授权，页面会在成功后继续显示交易结果，并自动跳转到对应的审计页。</p>
+        <p id="auth-countdown" class="status-warn">请在 30 秒内完成授权，倒计时结束后页面仍会继续等待结果。</p>
+      </div>
+    </div>
+
+    <script>
+      const STORAGE_KEYS = {
+        chat: "humanlinkpay-chat-history",
+        form: "humanlinkpay-form-draft",
+        autoOpen: "humanlinkpay-auto-open",
+        preset: "humanlinkpay-last-preset",
+        chatInput: "humanlinkpay-chat-input",
+      };
+      const THRESHOLD = 0.001;
+      const DEFAULT_ALLOWLISTED_ADDRESS = "0x2E5F15E329b49D4B38fFdD100E0793780966eA6D";
+
+      const chatLogEl = document.getElementById("chat-log");
+      const chatInputEl = document.getElementById("chat-input");
+      const toolArgsJsonEl = document.getElementById("tool-args-json");
+      const requestJsonEl = document.getElementById("request-json");
+      const responseJsonEl = document.getElementById("response-json");
+      const timelineEl = document.getElementById("timeline");
+      const statusPillEl = document.getElementById("status-pill");
+      const resultGridEl = document.getElementById("result-grid");
+      const overlayEl = document.getElementById("humanlink-overlay");
+      const authCountdownEl = document.getElementById("auth-countdown");
+      const presetHelpEl = document.getElementById("preset-help");
+      const formEl = document.getElementById("payment-form");
+
+      const userIdInput = document.getElementById("user-id");
+      const recipientInput = document.getElementById("recipient");
+      const amountInput = document.getElementById("amount");
+      const purposeInput = document.getElementById("purpose");
+      const tokenInput = document.getElementById("token");
+      const autoOpenEl = document.getElementById("auto-open");
+
+      let currentPreset = "require_hl";
+      let chatHistory = [];
+      let recordWindow = null;
+      let reservedRecordWindow = null;
+      let currentRecordToken = null;
+      let authPromptTimer = null;
+      let authCountdownTimer = null;
+
+      function saveChatHistory() {
+        localStorage.setItem(STORAGE_KEYS.chat, JSON.stringify(chatHistory));
+      }
+
+      function saveFormDraft() {
+        localStorage.setItem(
+          STORAGE_KEYS.form,
+          JSON.stringify({
+            userId: userIdInput.value,
+            to: recipientInput.value,
+            amount: amountInput.value,
+            purpose: purposeInput.value,
+            token: tokenInput.value,
+          })
+        );
+      }
+
+      function buildPayload() {
+        return {
+          userId: userIdInput.value.trim() || "demo-user",
+          to: recipientInput.value.trim(),
+          amount: amountInput.value.trim(),
+          token: tokenInput.value.trim() || "ETH",
+          purpose: purposeInput.value.trim(),
+        };
+      }
+
+      function hasCompletePaymentFields(payload) {
+        return Boolean(payload.to && payload.amount && payload.purpose);
+      }
+
+      function updateToolArgsPreview(payload) {
+        toolArgsJsonEl.textContent = JSON.stringify(payload, null, 2);
+        saveFormDraft();
+      }
+
+      function isPaymentLikeMessage(message) {
+        return /0x[a-fA-F0-9]{8,}|(?:^|\s)eth(?:\s|$)|转账|转给|付款|支付|打款|send|transfer|pay/i.test(message || "");
+      }
+
+      function getRecordStorageKey(token = currentRecordToken) {
+        return token ? `humanlinkpay-record-url:${token}` : "";
+      }
+
+      function reserveRecordWindowForGesture() {
+        if (!autoOpenEl.checked) {
+          return null;
+        }
+        if (reservedRecordWindow && !reservedRecordWindow.closed) {
+          return reservedRecordWindow;
+        }
+        try {
+          reservedRecordWindow = window.open("", "humanlinkpay-record-window");
+          if (reservedRecordWindow && reservedRecordWindow.document) {
+            reservedRecordWindow.document.write(`
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>HumanLinkPay 审计页预留窗口</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #0b1020;
+        color: #eef3ff;
+        font-family: Inter, system-ui, sans-serif;
+      }
+      .card {
+        width: min(420px, calc(100vw - 32px));
+        padding: 24px;
+        border-radius: 18px;
+        background: #121933;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+      p {
+        color: #9fb0d9;
+        line-height: 1.7;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>HumanLinkPay</h1>
+      <p>正在等待 gateway 判断这笔请求是否需要 HumanLink 授权。</p>
+    </div>
+  </body>
+</html>
+            `);
+            reservedRecordWindow.document.close();
+          }
+        } catch {
+          reservedRecordWindow = null;
+        }
+        return reservedRecordWindow;
+      }
+
+      function publishRecordUrl(url) {
+        const key = getRecordStorageKey();
+        if (!key || !url) {
+          return;
+        }
+        localStorage.setItem(
+          key,
+          JSON.stringify({
+            url,
+            createdAt: new Date().toISOString(),
+          })
+        );
+      }
+
+      function renderTimeline(steps) {
+        timelineEl.innerHTML = "";
+        steps.forEach((step) => {
+          const item = document.createElement("div");
+          item.className = `step ${step.state || ""}`.trim();
+          item.innerHTML = `
+            <div class="dot"></div>
+            <div>
+              <div class="step-title">${step.title}</div>
+              <div class="step-desc">${step.description}</div>
+            </div>
+          `;
+          timelineEl.appendChild(item);
+        });
+      }
+
+      function setStatus(text, level = "") {
+        statusPillEl.className = `status-pill ${level}`.trim();
+        statusPillEl.textContent = text;
+      }
+
+      function renderChat() {
+        chatLogEl.innerHTML = "";
+        chatHistory.forEach((entry) => {
+          const item = document.createElement("div");
+          item.className = `chat-message ${entry.role}`;
+          item.innerHTML = `
+            <div class="chat-role">${entry.role === "user" ? "用户" : "Hermes"}</div>
+            <div class="chat-body">${entry.body}</div>
+          `;
+          chatLogEl.appendChild(item);
+        });
+        chatLogEl.scrollTop = chatLogEl.scrollHeight;
+      }
+
+      function addChatMessage(role, body) {
+        chatHistory.push({ role, body });
+        saveChatHistory();
+        renderChat();
+      }
+
+      function clearChat() {
+        chatHistory = [];
+        saveChatHistory();
+        renderChat();
+      }
+
+      function predictedDecision(payload) {
+        const amount = Number(payload.amount || 0);
+        const allowlisted = String(payload.to || "").toLowerCase() === DEFAULT_ALLOWLISTED_ADDRESS.toLowerCase();
+        return !allowlisted ? "DENY" : amount > THRESHOLD ? "REQUIRE_HL" : "ALLOW";
+      }
+
+      function setPreset(name) {
+        currentPreset = name;
+        localStorage.setItem(STORAGE_KEYS.preset, name);
+        document.querySelectorAll(".preset").forEach((button) => button.classList.remove("active"));
+
+        const presets = {
+          deny: {
+            button: "preset-deny",
+            to: "0x000000000000000000000000000000000000dead",
+            amount: "0.0005",
+            purpose: "Dry run from frontend",
+            help: "DENY 示例：收款地址不在 allowlist，Gateway 会直接拒绝，不触发 HumanLink，也不会发链上交易。",
+            chat: "请调用 HumanlinkPay payment gateway，向 0x000000000000000000000000000000000000dead 支付 0.0005 ETH，用途是 Dry run from frontend。",
+          },
+          allow: {
+            button: "preset-allow",
+            to: DEFAULT_ALLOWLISTED_ADDRESS,
+            amount: "0.0005",
+            purpose: "Low risk payment",
+            help: "ALLOW 示例：收款地址在 allowlist 且金额不超过 0.001 ETH，交易会自动放行，不需要 HumanLink。",
+            chat: `请调用 HumanlinkPay payment gateway，向 ${DEFAULT_ALLOWLISTED_ADDRESS} 支付 0.0005 ETH，用途是 Low risk payment。`,
+          },
+          require_hl: {
+            button: "preset-require",
+            to: DEFAULT_ALLOWLISTED_ADDRESS,
+            amount: "0.0011",
+            purpose: "Buy API access",
+            help: "REQUIRE_HL 示例：收款地址在 allowlist 且金额超过 0.001 ETH，会触发 HumanLink SDK 指纹授权，成功后继续转账。",
+            chat: `请调用 HumanlinkPay payment gateway，向 ${DEFAULT_ALLOWLISTED_ADDRESS} 支付 0.0011 ETH，用途是 Buy API access。`,
+          },
+        };
+
+        const preset = presets[name];
+        document.getElementById(preset.button).classList.add("active");
+        recipientInput.value = preset.to;
+        amountInput.value = preset.amount;
+        purposeInput.value = preset.purpose;
+        tokenInput.value = "ETH";
+        chatInputEl.value = preset.chat;
+        presetHelpEl.textContent = preset.help;
+        localStorage.setItem(STORAGE_KEYS.chatInput, chatInputEl.value);
+        updateToolArgsPreview(buildPayload());
+      }
+
+      function renderResultMetrics(result) {
+        const execution = result.execution || {};
+        const assertion = result.assertion || {};
+        const links = [];
+        if (assertion.humanlink_record_url) {
+          links.push(`<a href="${assertion.humanlink_record_url}" target="_blank" rel="noopener">打开 HumanLink 审计页</a>`);
+        }
+        if (execution.tx_hash) {
+          links.push(`<a href="https://sepolia.etherscan.io/tx/${execution.tx_hash}" target="_blank" rel="noopener">打开 Sepolia 交易</a>`);
+        }
+
+        resultGridEl.innerHTML = `
+          <div class="metric">
+            <div class="metric-label">Decision</div>
+            <div class="metric-value">${result.decision || "-"}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Reason</div>
+            <div class="metric-value">${result.reason || "-"}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Action Hash</div>
+            <div class="metric-value"><code>${result.action_hash || "-"}</code></div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Execution Mode</div>
+            <div class="metric-value">${execution.mode || "-"}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Transaction Hash</div>
+            <div class="metric-value">${execution.tx_hash ? `<code>${execution.tx_hash}</code>` : "-"}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">审计链接</div>
+            <div class="metric-value">${links.length ? links.join("<br />") : "-"}</div>
+          </div>
+        `;
+      }
+
+      function payloadFromParsedIntent(parsed) {
+        return {
+          userId: String(parsed?.userId || userIdInput.value.trim() || "demo-user").trim(),
+          to: String(parsed?.to || "").trim(),
+          amount: String(parsed?.amount || "").trim(),
+          token: String(parsed?.token || tokenInput.value.trim() || "ETH").trim(),
+          purpose: String(parsed?.purpose || "").trim(),
+        };
+      }
+
+      function applyParsedFields(parsed) {
+        if (!parsed) {
+          return;
+        }
+        const nextPayload = payloadFromParsedIntent(parsed);
+        recipientInput.value = nextPayload.to;
+        amountInput.value = nextPayload.amount;
+        purposeInput.value = nextPayload.purpose;
+        userIdInput.value = nextPayload.userId;
+        tokenInput.value = nextPayload.token || "ETH";
+        updateToolArgsPreview(buildPayload());
+      }
+
+      async function callHermesChat(messages) {
+        const response = await fetch("/api/hermes/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: userIdInput.value.trim() || "demo-user",
+            messages,
+          }),
+        });
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { detail: { error: text || "Unknown response" } };
+        }
+        if (!response.ok) {
+          throw new Error(data?.detail?.error || text || `HTTP ${response.status}`);
+        }
+        return data;
+      }
+
+      async function callGateway(payload) {
+        const response = await fetch("/api/pay", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { raw: text };
+        }
+        if (!response.ok) {
+          const error = new Error(data?.detail?.error || data?.detail || text || `HTTP ${response.status}`);
+          error.payload = data;
+          throw error;
+        }
+        return data;
+      }
+
+      async function callGatewayPreview(payload) {
+        const response = await fetch("/api/pay/preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { raw: text };
+        }
+        if (!response.ok) {
+          const error = new Error(data?.detail?.error || data?.detail || text || `HTTP ${response.status}`);
+          error.payload = data;
+          throw error;
+        }
+        return data;
+      }
+
+      function ensureRecordWindow() {
+        if (!autoOpenEl.checked) {
+          return null;
+        }
+        if (!currentRecordToken) {
+          return null;
+        }
+        if (recordWindow && !recordWindow.closed) {
+          return recordWindow;
+        }
+        const targetUrl = `/ui/waiting-humanlink-record?token=${encodeURIComponent(currentRecordToken)}`;
+        if (reservedRecordWindow && !reservedRecordWindow.closed) {
+          recordWindow = reservedRecordWindow;
+          reservedRecordWindow = null;
+          try {
+            recordWindow.location.replace(targetUrl);
+          } catch {
+            recordWindow = null;
+          }
+          if (recordWindow) {
+            return recordWindow;
+          }
+        }
+        try {
+          recordWindow = window.open(targetUrl, "humanlinkpay-record-window");
+        } catch {
+          recordWindow = null;
+        }
+        return recordWindow;
+      }
+
+      function closeRecordWindowIfIdle(options = {}) {
+        const preserveReservation = Boolean(options.preserveReservation);
+        const key = getRecordStorageKey();
+        if (key) {
+          localStorage.removeItem(key);
+        }
+        if (recordWindow && !recordWindow.closed) {
+          try {
+            recordWindow.close();
+          } catch {}
+        }
+        recordWindow = null;
+        currentRecordToken = null;
+        if (!preserveReservation && reservedRecordWindow && !reservedRecordWindow.closed) {
+          try {
+            reservedRecordWindow.close();
+          } catch {}
+        }
+        if (!preserveReservation) {
+          reservedRecordWindow = null;
+        }
+      }
+
+      function startHumanLinkCountdown(seconds = 30) {
+        clearInterval(authCountdownTimer);
+        let remainingSeconds = seconds;
+        authCountdownEl.textContent = `请在 ${remainingSeconds} 秒内完成授权，倒计时结束后页面仍会继续等待结果。`;
+        authCountdownTimer = window.setInterval(() => {
+          remainingSeconds = Math.max(remainingSeconds - 1, 0);
+          if (remainingSeconds > 0) {
+            authCountdownEl.textContent = `请在 ${remainingSeconds} 秒内完成授权，倒计时结束后页面仍会继续等待结果。`;
+            return;
+          }
+          authCountdownEl.textContent = "已等待 30 秒。如果设备侧仍在处理中，请继续完成授权；页面会在成功后自动更新。";
+          clearInterval(authCountdownTimer);
+          authCountdownTimer = null;
+        }, 1000);
+      }
+
+      function scheduleHumanLinkPrompt(decision) {
+        clearTimeout(authPromptTimer);
+        clearInterval(authCountdownTimer);
+        authCountdownTimer = null;
+        overlayEl.classList.remove("show");
+        if (decision !== "REQUIRE_HL") {
+          return;
+        }
+        authPromptTimer = window.setTimeout(() => {
+          ensureRecordWindow();
+          overlayEl.classList.add("show");
+          startHumanLinkCountdown(30);
+          setStatus("等待 HumanLink SDK 指纹授权...", "status-warn");
+          addChatMessage("hermes", "这笔金额超过 0.001 ETH，我已经触发 HumanLink SDK，请你在设备上完成指纹授权。");
+        }, 1200);
+      }
+
+      function clearHumanLinkPrompt() {
+        clearTimeout(authPromptTimer);
+        clearInterval(authCountdownTimer);
+        authCountdownTimer = null;
+        overlayEl.classList.remove("show");
+        authCountdownEl.textContent = "请在 30 秒内完成授权，倒计时结束后页面仍会继续等待结果。";
+      }
+
+      async function submitPayment(payload, originalMessage) {
+        clearHumanLinkPrompt();
+        closeRecordWindowIfIdle({ preserveReservation: true });
+        requestJsonEl.textContent = JSON.stringify(payload, null, 2);
+        responseJsonEl.textContent = "{}";
+        resultGridEl.innerHTML = "";
+        updateToolArgsPreview(payload);
+
+        renderTimeline([
+          { title: "1. Hermes 理解用户意图", description: "从自然语言中提取收款地址、金额、用途", state: "done" },
+          { title: "2. 组装 PaymentIntent", description: "Hermes 将字段整理成结构化工具参数", state: "done" },
+          { title: "3. Gateway 接收请求", description: "正在发送到本地 /api/pay", state: "active" },
+          { title: "4. Policy 判断", description: "根据 0.001 ETH 阈值决定 DENY / ALLOW / REQUIRE_HL", state: "" },
+          { title: "5. HumanLink 授权", description: "高风险交易会触发 HumanLink SDK 指纹授权", state: "" },
+          { title: "6. 链上执行与结果", description: "执行 native_transfer 并展示 tx_hash 与审计链接", state: "" },
+        ]);
+        setStatus("请求发送中...", "status-warn");
+
+        try {
+          const preview = await callGatewayPreview(payload);
+          const previewDecision = preview.decision;
+          currentRecordToken = preview.recordWaitToken || null;
+
+          renderTimeline([
+            { title: "1. Hermes 理解用户意图", description: "从自然语言中提取收款地址、金额、用途", state: "done" },
+            { title: "2. 组装 PaymentIntent", description: "Hermes 将字段整理成结构化工具参数", state: "done" },
+            { title: "3. Gateway 接收请求", description: "Gateway 已收到 PaymentIntent，正在进行策略判断", state: "done" },
+            {
+              title: "4. Policy 判断",
+              description: `Decision = ${previewDecision}，原因：${preview.reason || "-"}`,
+              state: previewDecision === "DENY" ? "error" : "done",
+            },
+            {
+              title: "5. HumanLink 授权",
+              description: previewDecision === "REQUIRE_HL"
+                ? "后端真实策略已判定为高风险，准备触发 HumanLink SDK"
+                : previewDecision === "ALLOW"
+                  ? "后端真实策略已判定为低风险，将跳过 HumanLink"
+                  : "后端真实策略已拒绝，未进入 HumanLink",
+              state: previewDecision === "ALLOW" ? "done" : "",
+            },
+            { title: "6. 链上执行与结果", description: "等待 gateway 执行并返回最终结果", state: previewDecision === "DENY" ? "" : "active" },
+          ]);
+
+          const shouldExpectAudit = previewDecision === "REQUIRE_HL";
+          if (!shouldExpectAudit) {
+            closeRecordWindowIfIdle();
+          }
+          scheduleHumanLinkPrompt(previewDecision);
+
+          const result = await callGateway(payload);
+          clearHumanLinkPrompt();
+          responseJsonEl.textContent = JSON.stringify(result, null, 2);
+          renderResultMetrics(result);
+
+          const decision = result.decision;
+          const execution = result.execution || {};
+          const assertion = result.assertion || {};
+
+          renderTimeline([
+            { title: "1. Hermes 理解用户意图", description: originalMessage || "已根据对话理解支付意图", state: "done" },
+            { title: "2. 组装 PaymentIntent", description: "结构化参数已生成并发送", state: "done" },
+            { title: "3. Gateway 接收请求", description: "Gateway 已收到 PaymentIntent", state: "done" },
+            {
+              title: "4. Policy 判断",
+              description: `Decision = ${decision}，原因：${result.reason || "-"}`,
+              state: decision === "DENY" ? "error" : "done",
+            },
+            {
+              title: "5. HumanLink 授权",
+              description: decision === "REQUIRE_HL"
+                ? "已触发 HumanLink SDK，并完成 assertion 校验"
+                : decision === "ALLOW"
+                  ? "低风险交易直接放行，已跳过 HumanLink 授权"
+                  : "策略已拒绝，未进入 HumanLink 授权",
+              state: decision === "REQUIRE_HL" || decision === "ALLOW" ? "done" : "",
+            },
+            {
+              title: "6. 链上执行与结果",
+              description: execution.tx_hash
+                ? `已广播链上交易：${execution.tx_hash}`
+                : decision === "DENY"
+                  ? "策略拒绝后已停止，未发起链上交易"
+                  : "本次未发起链上交易",
+              state: execution.tx_hash ? "done" : decision === "DENY" ? "error" : "",
+            },
+          ]);
+
+          if (decision === "DENY") {
+            setStatus("请求被策略拒绝", "status-danger");
+            addChatMessage("hermes", `Gateway 返回 <code>DENY</code>，原因是：${result.reason || "未知"}。本次不会触发 HumanLink，也不会发起链上交易。`);
+            closeRecordWindowIfIdle();
+          } else if (decision === "REQUIRE_HL") {
+            setStatus("高风险交易已授权并执行", "status-ok");
+            addChatMessage("hermes", "金额超过阈值，已触发 HumanLink SDK 指纹授权，assertion 校验通过后完成链上广播。");
+            if (assertion.humanlink_record_url) {
+              addChatMessage("hermes", `我已拿到 HumanLink 审计页链接：<code>${assertion.humanlink_record_url}</code>。`);
+              publishRecordUrl(assertion.humanlink_record_url);
+              if (recordWindow && !recordWindow.closed) {
+                try {
+                  recordWindow.location.replace(assertion.humanlink_record_url);
+                } catch {}
+              } else if (autoOpenEl.checked) {
+                const reopened = ensureRecordWindow();
+                if (!reopened) {
+                  setStatus("结果成功，但浏览器拦截了自动打开审计页", "status-warn");
+                }
+              }
+            }
+          } else {
+            setStatus("低风险交易已自动放行", "status-ok");
+            addChatMessage("hermes", "这笔金额不超过 0.001 ETH，Gateway 直接自动放行，并完成 Sepolia 转账。");
+            closeRecordWindowIfIdle();
+          }
+        } catch (error) {
+          clearHumanLinkPrompt();
+          closeRecordWindowIfIdle();
+          const payload = error.payload || { error: String(error.message || error) };
+          responseJsonEl.textContent = JSON.stringify(payload, null, 2);
+          renderTimeline([
+            { title: "1. Hermes 理解用户意图", description: "已解析或手动填写请求参数", state: "done" },
+            { title: "2. 组装 PaymentIntent", description: "已组装请求体", state: "done" },
+            { title: "3. Gateway 接收请求", description: "请求已发送", state: "done" },
+            { title: "4. Policy 判断", description: "请求处理中发生错误", state: "error" },
+            { title: "5. HumanLink 授权", description: "未完成", state: "" },
+            { title: "6. 链上执行与结果", description: error.message || "未知错误", state: "error" },
+          ]);
+          setStatus("请求失败", "status-danger");
+          addChatMessage("hermes", `Gateway 返回错误：<code>${error.message || "未知错误"}</code>。`);
+        }
+      }
+
+      async function handleNaturalChat(message) {
+        clearHumanLinkPrompt();
+        closeRecordWindowIfIdle({ preserveReservation: true });
+        addChatMessage("user", message);
+        setStatus("Hermes 思考中...", "status-warn");
+
+        try {
+          const response = await callHermesChat(chatHistory.map((entry) => ({
+            role: entry.role,
+            content: entry.body.replace(/<[^>]+>/g, ""),
+          })));
+          addChatMessage("hermes", response.assistant_message);
+
+          if (response.payment_detected && response.payment_intent) {
+            applyParsedFields(response.payment_intent);
+            const payload = payloadFromParsedIntent(response.payment_intent);
+            addChatMessage(
+              "hermes",
+              `我准备调用 <code>humanlinkpay_transfer</code>，当前填入地址 <code>${payload.to || "-"}</code>、金额 <code>${payload.amount || "-"}</code> ETH、用途 <code>${payload.purpose || "-"}</code>。`
+            );
+            if (response.missing_fields && response.missing_fields.length) {
+              addChatMessage(
+                "hermes",
+                `这笔支付还缺少字段：<code>${response.missing_fields.join(", ")}</code>。补齐后就可以发起支付。`
+              );
+            } else if (hasCompletePaymentFields(payload)) {
+              addChatMessage(
+                "hermes",
+                `预测策略结果：<code>${predictedDecision(payload)}</code>。字段已齐全，我现在会自动把更新后的交易请求发送给 gateway。`
+              );
+              await submitPayment(payload, message);
+              return;
+            } else {
+              addChatMessage("hermes", `预测策略结果：<code>${predictedDecision(payload)}</code>。阈值为 <code>0.001 ETH</code>。`);
+            }
+          }
+
+          setStatus("Hermes 已回复", "status-ok");
+        } catch (error) {
+          addChatMessage("hermes", `我这边调用 Hermes 失败了：<code>${String(error.message || error)}</code>`);
+          setStatus("Hermes 调用失败", "status-danger");
+        }
+      }
+
+      function restoreState() {
+        const savedChat = localStorage.getItem(STORAGE_KEYS.chat);
+        const savedForm = localStorage.getItem(STORAGE_KEYS.form);
+        const savedAutoOpen = localStorage.getItem(STORAGE_KEYS.autoOpen);
+        const savedPreset = localStorage.getItem(STORAGE_KEYS.preset);
+        const savedChatInput = localStorage.getItem(STORAGE_KEYS.chatInput);
+
+        if (savedForm) {
+          try {
+            const data = JSON.parse(savedForm);
+            userIdInput.value = data.userId || "demo-user";
+            recipientInput.value = data.to || DEFAULT_ALLOWLISTED_ADDRESS;
+            amountInput.value = data.amount || "0.0011";
+            purposeInput.value = data.purpose || "Buy API access";
+            tokenInput.value = data.token || "ETH";
+          } catch {}
+        }
+
+        if (savedAutoOpen !== null) {
+          autoOpenEl.checked = savedAutoOpen === "true";
+        }
+
+        if (savedChatInput) {
+          chatInputEl.value = savedChatInput;
+        }
+
+        if (savedChat) {
+          try {
+            chatHistory = JSON.parse(savedChat) || [];
+          } catch {
+            chatHistory = [];
+          }
+        }
+
+        renderChat();
+        setPreset(savedPreset || "require_hl");
+        updateToolArgsPreview(buildPayload());
+      }
+
+      document.getElementById("send-chat").addEventListener("click", () => {
+        const message = chatInputEl.value.trim();
+        if (!message) {
+          return;
+        }
+        if (isPaymentLikeMessage(message)) {
+          reserveRecordWindowForGesture();
+        }
+        localStorage.setItem(STORAGE_KEYS.chatInput, message);
+        handleNaturalChat(message);
+      });
+
+      document.getElementById("clear-chat").addEventListener("click", () => {
+        clearChat();
+        addChatMessage("hermes", "聊天记录已清空。你可以继续自然聊天，当出现支付意图时我会自动帮你解析并填充请求。");
+      });
+
+      document.getElementById("check-health").addEventListener("click", async () => {
+        setStatus("检查 gateway 健康状态...", "status-warn");
+        try {
+          const response = await fetch("/health");
+          const data = await response.json();
+          responseJsonEl.textContent = JSON.stringify(data, null, 2);
+          addChatMessage("hermes", `Gateway 在线，当前执行模式是 <code>${data.execution_mode || "-"}</code>。`);
+          setStatus(`Gateway 在线：${data.status || "healthy"}`, "status-ok");
+        } catch (error) {
+          responseJsonEl.textContent = JSON.stringify({ error: String(error.message || error) }, null, 2);
+          setStatus("Gateway 不可用", "status-danger");
+        }
+      });
+
+      document.getElementById("preset-deny").addEventListener("click", () => setPreset("deny"));
+      document.getElementById("preset-allow").addEventListener("click", () => setPreset("allow"));
+      document.getElementById("preset-require").addEventListener("click", () => setPreset("require_hl"));
+
+      [userIdInput, recipientInput, amountInput, purposeInput, tokenInput].forEach((element) => {
+        element.addEventListener("input", () => updateToolArgsPreview(buildPayload()));
+      });
+
+      autoOpenEl.addEventListener("change", () => {
+        localStorage.setItem(STORAGE_KEYS.autoOpen, String(autoOpenEl.checked));
+      });
+
+      chatInputEl.addEventListener("input", () => {
+        localStorage.setItem(STORAGE_KEYS.chatInput, chatInputEl.value);
+      });
+
+      formEl.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        reserveRecordWindowForGesture();
+        await submitPayment(buildPayload(), chatInputEl.value.trim());
+      });
+
+      renderTimeline([
+        { title: "1. Hermes 理解用户意图", description: "等待你在聊天窗口中提出需求", state: "" },
+        { title: "2. 组装 PaymentIntent", description: "Hermes 自动提取地址、金额、用途并填到表单中", state: "" },
+        { title: "3. Gateway 接收请求", description: "Hermes 字段补齐后会自动发送到本地 gateway，也支持手动重试", state: "" },
+        { title: "4. Policy 判断", description: "根据 0.001 ETH 阈值决定 DENY / ALLOW / REQUIRE_HL", state: "" },
+        { title: "5. HumanLink 授权", description: "高风险交易需要指纹授权", state: "" },
+        { title: "6. 链上执行与结果", description: "展示 tx_hash 与审计页面链接", state: "" },
+      ]);
+      restoreState();
+      if (chatHistory.length === 0) {
+        addChatMessage("hermes", "我已准备好。你可以先自然聊天，聊到支付时我会自动解析地址、金额和用途；字段齐全后我会直接发起支付。");
+      }
+      setStatus("等待聊天或自动发起支付", "status-ok");
+    </script>
+  </body>
+</html>

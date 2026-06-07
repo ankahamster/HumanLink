@@ -1,0 +1,38 @@
+{
+  "name": "humanlinkpay_transfer",
+  "description": "Send a payment intent to the local HumanlinkPay gateway. High-risk payments trigger HumanLink biometric authorization before broadcasting the Sepolia transfer.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "to": {
+        "type": "string",
+        "description": "Recipient wallet address on Sepolia."
+      },
+      "amount": {
+        "type": "string",
+        "description": "ETH amount expressed as a decimal string, for example 0.005."
+      },
+      "purpose": {
+        "type": "string",
+        "description": "Human-readable payment purpose shown in the HumanLink authorization prompt."
+      },
+      "userId": {
+        "type": "string",
+        "description": "Optional agent user id. Defaults to demo-user."
+      },
+      "token": {
+        "type": "string",
+        "description": "Optional token symbol. Only ETH is currently supported."
+      },
+      "deadline": {
+        "type": "string",
+        "description": "Optional ISO 8601 deadline for the payment intent."
+      },
+      "nonce": {
+        "type": "string",
+        "description": "Optional client-provided nonce. If omitted, the adapter generates one."
+      }
+    },
+    "required": ["to", "amount", "purpose"]
+  }
+}

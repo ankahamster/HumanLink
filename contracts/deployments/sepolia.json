@@ -1,0 +1,12 @@
+{
+  "network": "sepolia",
+  "chainId": 0,
+  "deployer": "0x6D94E87fA68cc9b474D3E29141bB11930b5056B1",
+  "admin": "0x6D94E87fA68cc9b474D3E29141bB11930b5056B1",
+  "deployedAt": "2026-06-06T07:39:16.249Z",
+  "contracts": {
+    "IssueRegistry": "0xEDD9dB58B18DB1911eFaB70C7a0eB65Ec1A68E1e",
+    "UserDeviceRegistry": "0x81bEF3afb4b2D4a329408CA150062baE6A22628A",
+    "AssertionStatusRegistry": "0x9a9AFe0f78296AeED9D68d03E78A3F75EEa874F2"
+  }
+}
