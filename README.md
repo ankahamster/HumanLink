@@ -3,7 +3,100 @@
 > HumanLink Agent Payment Demo
 > 基于 HumanLink 硬件授权能力，为 AI Agent 支付场景提供可控执行、硬件在场确认与可审计记录。
 
----
+***
+
+## HumanLink 背景：Agent 时代的人类授权基础设施
+
+> HumanLinkPay 是构建在 **HumanLink** 通用协议之上的 Agent 支付场景 Demo。理解 HumanLinkPay 的「硬件在场授权」能力，需要先了解底层 HumanLink 协议的设计。
+
+### HumanLink 项目概述
+
+**一句话**：AI Agent 时代的人类在场授权基础设施。让任何人在任何 Agent 执行高风险操作前，留下密码学级别的不可伪造授权记录。
+
+类比：MCP 定义了 Agent 如何调用工具，HumanLink 定义了 Agent 执行高风险操作前如何留下不可伪造的人类授权记录。
+
+### 核心问题
+
+2025—2026 年，Agent 已经在替用户转账、发邮件、删文件。出事后，三方都没有可独立核验的证据：
+
+- 用户说「我没授权过」
+- 平台说「我们有操作日志」
+- 用户说「日志是你们自己写的，谁知道真不真」
+
+现有的「授权」只是软件 token——都由平台单方生成，用户无法独立核实，法律上无法举证。HumanLink 解决的是：**执行的那一刻，有没有留下真人物理授权的密码学证明。**
+
+### 竞品空白
+
+| 竞品方向                | 代表                    | 它解决的            | 它解决不了的                  |
+| ------------------- | --------------------- | --------------- | ----------------------- |
+| Agent 支付协议          | Visa TAP, Stripe ACP  | Agent 有没有**权限** | 执行时有没有**人类物理在场**        |
+| 软件 HITL 工具          | Permit.io, Auth0 CIBA | 有没有**软件层确认**    | 确认的是不是**真人**，证据能不能举证    |
+| 审计合规平台              | FireTail, Zenity      | Agent **做了什么**  | 有没有**人类同意**，同意记录是否可独立核验 |
+| Proof of Personhood | Worldcoin             | **注册时**是人       | **此刻执行时**在不在场           |
+| 设备生物认证              | Apple Touch ID        | 是不是**设备主人**     | 跨平台操作绑定、链上可审计           |
+
+HumanLink 填补的空白：**此刻物理在场 + 操作绑定 + 密码学可举证 + 链上可审计 + 开放协议**。
+
+### Cobo Agentic Wallet vs HumanLink
+
+HumanLink 与 Cobo 解决不同层面的问题：Cobo 是 Agent 钱包执行基础设施，HumanLink 是人类在场授权证明协议层。
+
+| 维度    | Cobo Agentic Wallet                    | HumanLink                           |
+| ----- | -------------------------------------- | ----------------------------------- |
+| 核心定位  | Agent 钱包执行基础设施                         | 人类在场授权证明协议层                         |
+| 授权模型  | Pact：owner 批准任务级边界（intent、plan、budget） | Challenge + actionHash：单次操作级断言      |
+| 人工确认  | Owner 在 Cobo app 中批准 Pact              | 用户在 HumanLink 设备上物理确认 actionHash    |
+| 签名私钥  | MPC key shares（资产控制权）                  | SE 独立私钥（授权证明权）                      |
+| 签名对象  | 链上交易 / 钱包操作；Pact 内容独立可验签签名未明确 | actionHash / Challenge / 授权上下文 |
+| 第三方验签 | 依赖 Cobo 钱包体系与平台审计语义；审批日志在 Cobo 平台内部，无法脱离平台独立核验 | 基于 assertion + 设备身份 + registry + revocation 独立验签；审计记录可脱离平台独立核验 |
+
+### 技术路线对比
+
+HumanLink 采用**分立式硬件架构**（生物模块 + MCU + Secure Element），与三大主流路线对比：
+
+| 维度 | HumanLink 分立式 | Apple Secure Enclave | Android TEE+StrongBox | 工业 / IoT SE 路线 |
+|---|---|---|---|---|
+| 安全边界 | 分散，需补强 | 最集中 | OEM 差异大 | 中等，SE 强但生物处理通常在外部 |
+| 操作绑定 | **强**（actionHash） | 中等 | 弱到中等 | 中等，取决于业务实现 |
+| 第三方验证与举证 | **强**：可独立验签、查设备注册状态与撤销记录、生成跨平台审计证据 | 弱，主要依赖本机或 Apple 生态，不输出开放授权断言 | 弱到中等，依赖系统 API 和 OEM 实现，外部证明能力弱 | 中等，可验证设备签名，但不一定验证人类授权 |
+| 审计/状态层 | Verifier + Registry + Revocation + Audit log，形成完整授权证明链 | 主要为系统内部日志，不面向第三方审计 | 主要为系统内部安全日志 | 可有设备日志或证书状态，通常不面向人类授权证明 |
+| 开放性 | **高**，可替换模组 | 低 | 中等 | **高**，适合嵌入不同硬件平台 |
+| Agent 场景适配 | **强**：拦截高风险行为 | 弱 | 弱到中等 | 中等，更适合设备认证 |
+
+分立式路线的代价是安全边界分散，需在 Secure Boot、模块 attestation、链路保护上持续补强。当前 Demo 指纹授权基于 JM-101（指纹匹配，非强活体检测），详见 [TECHNICAL\_ROADMAP/](./TECHNICAL_ROADMAP/)。
+
+### HumanLink 协议设计（四层架构）
+
+HumanLink 不是封闭硬件产品，而是 **开放协议 + SDK + 参考硬件** 三层设计：
+
+| 层                | 职责           | 关键内容                                                                        |
+| ---------------- | ------------ | --------------------------------------------------------------------------- |
+| **协议核心层**        | 授权证明规范       | `Challenge`、`actionHash`、`HumanPresenceAssertion`、签名格式、10 步验证流程             |
+| **接入层 (SDK)**    | 统一验证接口       | 本地/云端同一套 SDK：生成 Challenge、调用设备签名、验证 Assertion、写入审计                          |
+| **身份与链上层**       | 设备身份与审计      | Device DID 链上注册、用户↔设备绑定、Assertion 撤销、审计记录锚定                                 |
+| **硬件抽象接口 (HAI)** | 合规 Issuer 标准 | 定义签发设备的能力要求与输出格式，不绑定特定硬件（`get_device_did`、`get_attestation`、`authenticate`） |
+
+**当前参考实现**：ESP32 + JM-101 指纹模块 + ATECC608A Secure Element（分立式路线）。
+
+**核心设计原则**：一次按压 = 一份断言 = 一次授权，不缓存，不复用。
+
+### HumanLink 与 HumanLinkPay 的关系
+
+```
+HumanLink (通用基础设施 — HumanLink 仓库)
+  ├── 协议层: Challenge / Assertion / 10 步验证
+  ├── SDK:     本地验证、设备通信、审计记录
+  ├── 硬件:    指纹 + SE 签名的参考实现
+  │
+  └── 应用场景 Demo
+        └── HumanLinkPay ← 本仓库子项目
+              场景: Agent 支付安全网关
+              能力: 小额自动 / 高风险指纹授权 / 三层审计
+```
+
+> 完整 HumanLink 协议文档见 [HumanLink\_doc/README.md](./HumanLink_doc/README.md)。技术路线与安全增强方向见 [TECHNICAL\_ROADMAP/](./TECHNICAL_ROADMAP/)。
+
+***
 
 ## 一句话定位
 
@@ -22,7 +115,7 @@
 apps/humanlinkpay/
 ```
 
----
+***
 
 ## 核心问题
 
@@ -38,7 +131,7 @@ HumanLinkPay 的答案是：
 - Gateway 负责策略判断、Challenge 生成、Assertion 校验和链上执行
 - HumanLink 设备负责提供高风险操作的人类在场授权证明
 
----
+***
 
 ## Demo 场景
 
@@ -82,7 +175,7 @@ HumanLinkPay 的答案是：
    - tx_hash
 ```
 
----
+***
 
 ## 系统架构
 
@@ -116,7 +209,7 @@ HumanLinkPay 的答案是：
 └──────────────────────────────────────────────────────────────┘
 ```
 
----
+***
 
 ## 当前已跑通能力
 
@@ -138,7 +231,7 @@ HumanLinkPay 的答案是：
 - Hermes 自然聊天 -> 结构化支付参数提取 -> 自动发起支付
 - 高风险授权弹窗与 30 秒倒计时
 
----
+***
 
 ## 策略模型
 
@@ -155,7 +248,7 @@ HumanLinkPay 的答案是：
 - `ALLOW`：低风险自动放行，直接转账
 - `REQUIRE_HL`：高风险，需要 HumanLink 指纹授权后继续转账
 
----
+***
 
 ## PaymentIntent
 
@@ -175,7 +268,7 @@ HumanLinkPay 的答案是：
 
 Gateway 内部会进一步生成 `CanonicalPaymentIntent`，并基于它计算 `action_hash`。
 
----
+***
 
 ## 仓库落点
 
@@ -198,16 +291,16 @@ HumanLink/
 
 子目录说明：
 
-| 目录 | 作用 | 当前状态 |
-| --- | --- | --- |
-| `apps/humanlinkpay/agent/` | Hermes 工具层、mock 请求和 adapter | 已有可用脚本 |
-| `apps/humanlinkpay/gateway/` | 核心支付网关、策略、SDK 调用、执行与审计 | 已跑通主链路 |
-| `apps/humanlinkpay/frontend/` | 可视化 Demo 页面、聊天窗口、流程面板 | 已跑通 |
-| `apps/humanlinkpay/docs/` | 补充文档 | 已补本地审计说明 |
-| `apps/humanlinkpay/contracts/` | 合约实验区 | 当前不是主展示路径 |
-| `apps/humanlinkpay/deployments/` | 部署记录占位 | 待补充 |
+| 目录                               | 作用                          | 当前状态      |
+| -------------------------------- | --------------------------- | --------- |
+| `apps/humanlinkpay/agent/`       | Hermes 工具层、mock 请求和 adapter | 已有可用脚本    |
+| `apps/humanlinkpay/gateway/`     | 核心支付网关、策略、SDK 调用、执行与审计      | 已跑通主链路    |
+| `apps/humanlinkpay/frontend/`    | 可视化 Demo 页面、聊天窗口、流程面板       | 已跑通       |
+| `apps/humanlinkpay/docs/`        | 补充文档                        | 已补本地审计说明  |
+| `apps/humanlinkpay/contracts/`   | 合约实验区                       | 当前不是主展示路径 |
+| `apps/humanlinkpay/deployments/` | 部署记录占位                      | 待补充       |
 
----
+***
 
 ## 快速启动
 
@@ -277,7 +370,7 @@ HUMANLINKPAY_AUTO_OPEN_DEMO_UI=true \
 http://127.0.0.1:8787/ui/payment-demo
 ```
 
----
+***
 
 ## 使用方式
 
@@ -316,7 +409,7 @@ curl -X POST http://127.0.0.1:8787/api/pay \
   }'
 ```
 
----
+***
 
 ## 演示建议
 
@@ -352,7 +445,7 @@ curl -X POST http://127.0.0.1:8787/api/pay \
 5. 授权成功后跳转审计页
 6. 返回 Sepolia `tx_hash`
 
----
+***
 
 ## 审计与结果
 
@@ -366,26 +459,26 @@ curl -X POST http://127.0.0.1:8787/api/pay \
    - 返回字段：`tx_hash`
    - 可跳转 Sepolia Etherscan
 
-补充说明见 [apps/humanlinkpay/docs/local_audit.md](./apps/humanlinkpay/docs/local_audit.md)。
+补充说明见 [apps/humanlinkpay/docs/local\_audit.md](./apps/humanlinkpay/docs/local_audit.md)。
 
----
+***
 
 ## 关键文件
 
 - 子项目主说明：[apps/humanlinkpay/README.md](./apps/humanlinkpay/README.md)
 - Gateway 入口：[main.py](./apps/humanlinkpay/gateway/main.py)
-- Hermes Bridge：[hermes_bridge.py](./apps/humanlinkpay/gateway/hermes_bridge.py)
-- 支付执行器：[payment_executor.py](./apps/humanlinkpay/gateway/payment_executor.py)
+- Hermes Bridge：[hermes\_bridge.py](./apps/humanlinkpay/gateway/hermes_bridge.py)
+- 支付执行器：[payment\_executor.py](./apps/humanlinkpay/gateway/payment_executor.py)
 - 策略引擎：[policy.py](./apps/humanlinkpay/gateway/policy.py)
 - Gateway 说明：[gateway/README.md](./apps/humanlinkpay/gateway/README.md)
 - Frontend 页面：[index.html](./apps/humanlinkpay/frontend/index.html)
 - Frontend 说明：[frontend/README.md](./apps/humanlinkpay/frontend/README.md)
-- Mock Agent：[mock_agent.py](./apps/humanlinkpay/agent/mock_agent.py)
-- Hermes Adapter：[hermes_adapter.py](./apps/humanlinkpay/agent/hermes_adapter.py)
-- Hermes Tool Schema：[hermes_tool_schema.json](./apps/humanlinkpay/agent/hermes_tool_schema.json)
+- Mock Agent：[mock\_agent.py](./apps/humanlinkpay/agent/mock_agent.py)
+- Hermes Adapter：[hermes\_adapter.py](./apps/humanlinkpay/agent/hermes_adapter.py)
+- Hermes Tool Schema：[hermes\_tool\_schema.json](./apps/humanlinkpay/agent/hermes_tool_schema.json)
 - DemoMerchant 合约：[DemoMerchant.sol](./apps/humanlinkpay/contracts/DemoMerchant.sol)
 
----
+***
 
 ## 当前边界
 
@@ -405,7 +498,7 @@ curl -X POST http://127.0.0.1:8787/api/pay \
 - 更复杂的预算模型
 - 强活体检测、模块级 attestation、secure boot
 
----
+***
 
 ## 设计原则
 
@@ -418,7 +511,23 @@ curl -X POST http://127.0.0.1:8787/api/pay \
 - **执行必须可审计**
   - 本地日志、SDK 记录页、链上结果三层可回溯
 
----
+***
+
+## 与 AI × Web3 School Handbook 的关联
+
+HumanlinkPay 的 Demo 场景属于 Handbook **模块 B（Payment/Commerce）**，核心功能开发落在 **模块 D/E/F**。一句话：模块 B 是叙事线（用户看到的场景），模块 D/E/F 是工程线（代码实际在做什么）。
+
+| Handbook 章节                                                                    | 核心概念                                           | HumanlinkPay 对应                                                              |
+| ------------------------------------------------------------------------------ | ---------------------------------------------- | ---------------------------------------------------------------------------- |
+| [Agentic Commerce](https://aiweb3.school/zh/handbook/tracks/agentic-commerce/) | Payment Intent、Budget Control、On-chain Receipt | PaymentIntent 字段设计、金额阈值控制、链上 tx 收据                                           |
+| [Agent Wallet](https://aiweb3.school/zh/handbook/bridge/agent-wallet/)         | Policy、Guard、Human Check、Session Key           | Gateway Policy Engine = Policy+Guard；ALLOW/REQUIRE\_HL/DENY = 分层 Human Check |
+| [Agent Identity](https://aiweb3.school/zh/handbook/bridge/agent-identity/)     | Ownership、Capability、硬件根信任                     | SE 签名作为 Agent action 的 owner 在场证明                                            |
+| [AI Security](https://aiweb3.school/zh/handbook/bridge/ai-security/)           | Prompt Injection 防御、Tool Abuse、Audit Log       | Gateway 不信 Agent 自然语言；Agent 不直接调合约；三层审计                                      |
+| [Verifiable AI](https://aiweb3.school/zh/handbook/bridge/verifiable-ai/)       | Audit Trail、按风险分层验证                            | 三层审计（SDK+Gateway+链上）；低风险自动 / 高风险 hardware attestation                        |
+
+未来可扩展方向：[Agent Trust & Reputation](https://aiweb3.school/zh/handbook/bridge/agent-trust-and-reputation/)（三维信誉数据）、[Settlement & Escrow](https://aiweb3.school/zh/handbook/bridge/settlement-and-escrow/)（高风险支付争议窗口）。
+
+***
 
 ## 后续可扩展方向
 
@@ -427,3 +536,4 @@ curl -X POST http://127.0.0.1:8787/api/pay \
 - 引入更强的设备 attestation 和硬件证明链
 - 为多轮 Hermes 对话增加更稳定的流式事件展示
 - 增加一键启动脚本和更完整的演示手册
+
