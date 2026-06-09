@@ -157,6 +157,8 @@ HumanLink 不是封闭硬件产品，而是 **开放协议 + SDK + 参考硬件*
 
 ***
 
+> 完整 HumanLink 协议文档见 [HumanLink_doc/README.md](./HumanLink_doc/README.md)。技术路线与安全增强方向见 [TECHNICAL_ROADMAP/](./TECHNICAL_ROADMAP/)。
+
 <br />
 
 ## HumanLinkPay定位
@@ -251,8 +253,6 @@ HumanLink (通用基础设施 — HumanLink 仓库)
               场景: Agent 支付安全网关
               能力: 小额自动 / 高风险指纹授权 / 三层审计
 ```
-
-> 完整 HumanLink 协议文档见 [HumanLink\_doc/README.md](./HumanLink_doc/README.md)。技术路线与安全增强方向见 [TECHNICAL\_ROADMAP/](./TECHNICAL_ROADMAP/)。
 
 ***
 
