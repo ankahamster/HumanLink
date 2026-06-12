@@ -1,6 +1,6 @@
 # HumanLinkPay
 
-> HumanLink Agent Payment Demo
+> HumanLinkPay
 > 基于 HumanLink 硬件授权能力，为 AI Agent 支付场景提供可控执行、硬件在场确认与可审计记录。
 
 ***
@@ -546,6 +546,16 @@ curl -X POST http://127.0.0.1:8787/api/pay \
    - 可跳转 Sepolia Etherscan
 
 补充说明见 [apps/humanlinkpay/docs/local\_audit.md](./apps/humanlinkpay/docs/local_audit.md)。
+
+***
+
+## 测试网运行证据
+
+> Sepolia 测试网实际运行记录，均以链接形式可查。
+
+- **授权记录上链合约**：[`AssertionStatusRegistry`](https://sepolia.etherscan.io/address/0x9a9AFe0f78296AeED9D68d03E78A3F75EEa874F2)
+- **ALLOW 示例交易**（低风险自动放行，amount ≤ 0.001 ETH，不触发 HumanLink 授权）：[`0x077d…09f1`](https://sepolia.etherscan.io/tx/0x077d1015f7df013fd0218bcbb4bd2d963e33bfd94024d6c3b33c9d72c2c009f1)
+- **REQUIRE_HL 示例交易**（高风险 HumanLink 指纹授权后执行，审计记录上链）：[`0x9a67…e332`](https://sepolia.etherscan.io/tx/0x9a672a19dbff15eae71c19eae9685e9cdb6ebf8de09424bfb80ec71383e5e332)
 
 ***
 
